@@ -1,0 +1,160 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Accueil";
+}
+
+<section class="hero">
+    <div class="hero-bg">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-orb hero-orb-3"></div>
+    </div>
+    <div class="container hero-content">
+        <div class="hero-badge">
+            <i class="fas fa-sparkles"></i> Plateforme d'Apprentissage par IA
+        </div>
+        <h1 class="hero-title">
+            Apprenez plus intelligemment.<br />
+            <span class="gradient-text">Retenez plus vite.</span><br />
+            Progressez sans limites.
+        </h1>
+        <p class="hero-subtitle">
+            BrainHuge Academy associe à chaque cours <strong>Nova</strong> — un tuteur IA adaptatif
+            qui évolue avec vous. Fini l'étude passive. Ici, l'apprentissage écoute, s'adapte et vous répond.
+        </p>
+        <div class="hero-actions">
+            <a href="/Learner/Catalog" class="btn btn-lg btn-primary">
+                <i class="fas fa-rocket"></i> Explorer les Cours
+            </a>
+            <a href="/Account/Register" class="btn btn-lg btn-glass">
+                <i class="fas fa-user-plus"></i> Créer un Compte Gratuit
+            </a>
+        </div>
+        <div class="hero-features">
+            <div class="hero-feature">
+                <i class="fas fa-book-open"></i>
+                <span>Parcours Structurés</span>
+            </div>
+            <div class="hero-feature">
+                <i class="fas fa-brain"></i>
+                <span>Tuteur IA Nova</span>
+            </div>
+            <div class="hero-feature">
+                <i class="fas fa-chart-line"></i>
+                <span>Suivi de Progression</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="method-section" id="method">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">Comment ça marche</span>
+            <h2>De la Curiosité à la Maîtrise</h2>
+            <p>Un parcours d'apprentissage clair conçu pour vous faire avancer sans overwhelm.</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">01</div>
+                <div class="step-icon"><i class="fas fa-compass"></i></div>
+                <h3>Choisissez un Cours</h3>
+                <p>Parcourez notre catalogue trié par catégorie, niveau de compétence et durée.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">02</div>
+                <div class="step-icon"><i class="fas fa-layer-group"></i></div>
+                <h3>Progression par Module</h3>
+                <p>Leçons, exercices et quiz suivent un parcours cohérent pour une compréhension profonde.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">03</div>
+                <div class="step-icon"><i class="fas fa-robot"></i></div>
+                <h3>Discutez avec Nova</h3>
+                <p>Posez des questions, demandez des exemples ou testez-vous — Nova s'adapte à votre style en temps réel.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="featured-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">En Vedette</span>
+            <h2>Commencez à Apprendre Aujourd'hui</h2>
+        </div>
+        <div class="courses-grid">
+            @foreach (dynamic course in Model)
+            {
+                <div class="course-card">
+                    <div class="course-card-top">
+                        <span class="course-category">@course.Category</span>
+                        <span class="course-level">@course.Level</span>
+                    </div>
+                    <h3 class="course-title">@course.Title</h3>
+                    <p class="course-desc">@course.Description</p>
+                    <div class="course-meta">
+                        <span><i class="fas fa-clock"></i> @course.DurationHours h</span>
+                        <span><i class="fas fa-cubes"></i> @course.Modules.Count modules</span>
+                    </div>
+                    <a href="/Learner/Details/@course.Id" class="btn btn-block btn-primary">
+                        Voir le Cours <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            }
+        </div>
+        <div class="text-center" style="margin-top: 2rem;">
+            <a href="/Learner/Catalog" class="btn btn-outline btn-lg">Voir Tous les Cours</a>
+        </div>
+    </div>
+</section>
+
+<section class="nova-section">
+    <div class="container">
+        <div class="nova-card">
+            <div class="nova-visual">
+                <div class="nova-avatar">
+                    <i class="fas fa-brain"></i>
+                    <div class="nova-pulse"></div>
+                </div>
+            </div>
+            <div class="nova-text">
+                <span class="section-badge">Tuteur IA Nova</span>
+                <h2>Rencontrez Nova : Votre Partenaire d'Apprentissage</h2>
+                <p>Nova n'est pas juste un chatbot. C'est un tuteur IA personnalisé qui comprend votre style d'apprentissage, retient vos points faibles et adapte ses explications en temps réel.</p>
+                <ul class="nova-features">
+                    <li><i class="fas fa-check-circle"></i> Posez des questions — aucune question n'est trop simple ou trop avancée</li>
+                    <li><i class="fas fa-check-circle"></i> Obtenez des analogies adaptées à votre niveau</li>
+                    <li><i class="fas fa-check-circle"></i> Déféiez-vous avec des questions de suivi générées par l'IA</li>
+                    <li><i class="fas fa-check-circle"></i> Suivez votre progression avec des cartes de connaissances</li>
+                </ul>
+                <a href="/AiTutor/Chat" class="btn btn-lg btn-primary" style="margin-top: 1rem;">
+                    <i class="fas fa-comments"></i> Démarrer une Conversation avec Nova
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.Stats.Courses</div>
+                <div class="stat-label">Cours</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.Stats.Modules</div>
+                <div class="stat-label">Modules</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.Stats.Learners</div>
+                <div class="stat-label">Apprenants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">@ViewBag.Stats.Quizzes</div>
+                <div class="stat-label">Quiz</div>
+            </div>
+        </div>
+    </div>
+</section>

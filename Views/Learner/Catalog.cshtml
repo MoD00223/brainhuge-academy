@@ -1,0 +1,67 @@
+@model List<BrainHugeAcademy.Models.Course>
+@{
+    ViewData["Title"] = "Catalogue de Cours";
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1>Catalogue de Cours</h1>
+        <p>Explorez des parcours d'apprentissage structurés pour une vraie progression.</p>
+    </div>
+</section>
+
+<section class="catalog-section">
+    <div class="container">
+        <form method="get" class="filter-bar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" value="@ViewBag.CurrentSearch" placeholder="Rechercher des cours..." />
+            </div>
+            <select name="category" class="filter-select">
+                <option value="">Toutes les Catégories</option>
+                @foreach (var cat in (List<string>)ViewBag.Categories)
+                {
+                    <option value="@cat" selected="@(ViewBag.CurrentCategory == cat)">@cat</option>
+                }
+            </select>
+            <select name="level" class="filter-select">
+                <option value="">Tous les Niveaux</option>
+                @foreach (var lvl in (List<string>)ViewBag.Levels)
+                {
+                    <option value="@lvl" selected="@(ViewBag.CurrentLevel == lvl)">@lvl</option>
+                }
+            </select>
+            <button type="submit" class="btn btn-primary">Filtrer</button>
+        </form>
+
+        <div class="courses-grid">
+            @foreach (var course in Model)
+            {
+                <div class="course-card">
+                    <div class="course-card-top">
+                        <span class="course-category">@course.Category</span>
+                        <span class="course-level">@course.Level</span>
+                    </div>
+                    <h3 class="course-title">@course.Title</h3>
+                    <p class="course-desc">@course.Description</p>
+                    <div class="course-meta">
+                        <span><i class="fas fa-clock"></i> @course.DurationHours h</span>
+                        <span><i class="fas fa-cubes"></i> @course.Modules.Count modules</span>
+                    </div>
+                    <a href="/Learner/Details/@course.Id" class="btn btn-block btn-primary">
+                        Voir le Cours <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            }
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>Aucun cours trouvé</h3>
+                <p>Essayez d'ajuster votre recherche ou vos filtres.</p>
+            </div>
+        }
+    </div>
+</section>

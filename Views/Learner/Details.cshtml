@@ -1,0 +1,72 @@
+@model BrainHugeAcademy.Models.Course
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="page-header">
+    <div class="container">
+        <a href="/Learner/Catalog" class="breadcrumb"><i class="fas fa-arrow-left"></i> Retour au Catalogue</a>
+        <div class="detail-header">
+            <div>
+                <span class="course-category">@Model.Category</span>
+                <span class="course-level">@Model.Level</span>
+                <h1>@Model.Title</h1>
+                <p class="detail-desc">@Model.Description</p>
+                <div class="detail-meta">
+                    <span><i class="fas fa-clock"></i> @Model.DurationHours heures</span>
+                    <span><i class="fas fa-cubes"></i> @Model.Modules.Count modules</span>
+                </div>
+            </div>
+            <div class="detail-action">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (ViewBag.IsEnrolled == true)
+                    {
+                        <a href="/Learner/MyCourses" class="btn btn-lg btn-success"><i class="fas fa-play"></i> Continuer l'Apprentissage</a>
+                    }
+                    else
+                    {
+                        <form asp-controller="Learner" asp-action="Enroll" method="post">
+                            <input type="hidden" name="courseId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-lg btn-primary"><i class="fas fa-plus-circle"></i> S'inscrire Gratuitement</button>
+                        </form>
+                    }
+                }
+                else
+                {
+                    <a href="/Account/Register" class="btn btn-lg btn-primary"><i class="fas fa-user-plus"></i> S'inscrire pour S'inscrire</a>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="modules-section">
+    <div class="container">
+        <h2 class="section-title">Modules du Cours</h2>
+        <div class="modules-list">
+            @foreach (var module in Model.Modules.OrderBy(m => m.OrderIndex))
+            {
+                <div class="module-card">
+                    <div class="module-header">
+                        <span class="module-order">@(module.OrderIndex.ToString("D2"))</span>
+                        <div>
+                            <h3>@module.Title</h3>
+                            <p>@module.Description</p>
+                        </div>
+                    </div>
+                    <div class="module-details">
+                        <span><i class="fas fa-book"></i> @module.Lessons.Count leçons</span>
+                        <span><i class="fas fa-question-circle"></i> @module.Quizzes.Count quiz</span>
+                        @if (User.Identity?.IsAuthenticated == true && ViewBag.IsEnrolled == true)
+                        {
+                            <a href="/Learner/Module?courseId=@Model.Id&moduleId=@module.Id" class="btn btn-sm btn-primary">
+                                Commencer le Module <i class="fas fa-arrow-right"></i>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

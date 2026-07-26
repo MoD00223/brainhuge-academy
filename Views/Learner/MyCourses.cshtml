@@ -1,0 +1,84 @@
+@model List<BrainHugeAcademy.Models.Enrollment>
+@{
+    ViewData["Title"] = "Mon Apprentissage";
+}
+
+<section class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-book-open"></i> Mon Carnet d'Apprentissage</h1>
+        <p>Suivez votre progression dans tous vos cours inscrits.</p>
+    </div>
+</section>
+
+<section class="mycourses-section">
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="fas fa-book-open"></i>
+                <h3>Pas encore de cours</h3>
+                <p>Commencez votre parcours d'apprentissage en explorant notre catalogue.</p>
+                <a href="/Learner/Catalog" class="btn btn-primary btn-lg">Parcourir les Cours</a>
+            </div>
+        }
+        else
+        {
+            <div class="enrollments-list">
+                @foreach (var enrollment in Model)
+                {
+                    var completed = enrollment.Progress.Count(p => p.IsCompleted);
+                    var total = enrollment.Course.Modules.Count;
+                    var pct = total > 0 ? (int)((double)completed / total * 100) : 0;
+
+                    <div class="enrollment-card">
+                        <div class="enrollment-info">
+                            <span class="course-category">@enrollment.Course.Category</span>
+                            <h3>@enrollment.Course.Title</h3>
+                            <p class="enrollment-date">Inscrit le @enrollment.EnrolledAt.ToString("dd MMM yyyy")</p>
+                        </div>
+                        <div class="enrollment-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: @(pct)%"></div>
+                            </div>
+                            <span class="progress-text">@completed / @total modules terminés</span>
+                            @if (completed > 0)
+                            {
+                                <div class="stamps-row">
+                                    @for (int i = 0; i < completed; i++)
+                                    {
+                                        <svg class="stamp-svg" width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(-8deg);">
+                                            <circle cx="26" cy="26" r="23" stroke="#B4432F" stroke-width="2.5" stroke-dasharray="4 2.5" fill="rgba(180,67,47,0.06)" />
+                                            <text x="26" y="22" text-anchor="middle" fill="#B4432F" font-family="Georgia,serif" font-size="7" font-weight="700" letter-spacing="0.5">VALIDÉ</text>
+                                            <text x="26" y="33" text-anchor="middle" fill="#B4432F" font-family="'IBM Plex Mono',monospace" font-size="10" font-weight="600">@(i + 1)</text>
+                                        </svg>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <div class="enrollment-actions">
+                            @if (completed < total)
+                            {
+                                var nextModule = enrollment.Course.Modules
+                                    .Where(m => !enrollment.Progress.Any(p => p.ModuleId == m.Id && p.IsCompleted))
+                                    .OrderBy(m => m.OrderIndex)
+                                    .FirstOrDefault();
+
+                                if (nextModule != null)
+                                {
+                                    <a href="/Learner/Module?courseId=@enrollment.CourseId&moduleId=@nextModule.Id" class="btn btn-primary">
+                                        <i class="fas fa-play"></i> Continuer
+                                    </a>
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge-success"><i class="fas fa-trophy"></i> Cours Terminé !</span>
+                            }
+                            <a href="/Learner/Details/@enrollment.CourseId" class="btn btn-outline">Détails</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

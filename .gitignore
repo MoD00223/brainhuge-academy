@@ -1,0 +1,16 @@
+bin/
+obj/
+*.db
+*.db-shm
+*.db-wal
+*.user
+.vs/
+
+# Secrets & local config — never commit
+appsettings.Development.json
+appsettings.*.json
+.env
+.env.*
+*.log
+nova-server.log
+nova-server-err.log

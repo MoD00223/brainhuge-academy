@@ -1,0 +1,217 @@
+@model List<BrainHugeAcademy.Models.AiConversation>
+@{
+    ViewData["Title"] = "Tuteur IA Nova";
+    var module = ViewBag.Module as BrainHugeAcademy.Models.CourseModule;
+}
+
+<section class="ai-page">
+    <div class="container">
+        <div class="ai-container">
+            <div class="ai-header">
+                <div class="ai-avatar">
+                    <i class="fas fa-brain"></i>
+                    <div class="ai-status-dot"></div>
+                </div>
+                <div class="ai-header-info">
+                    <h1>Nova <span class="ai-badge">Tuteur IA</span></h1>
+                    @if (module != null)
+                    {
+                        <p class="ai-context">Aide sur : <strong>@module.Title</strong> — @module.Course.Title</p>
+                    }
+                    else
+                    {
+                        <p class="ai-context">Votre compagnon d'apprentissage adaptatif. Demandez-moi n'importe quoi.</p>
+                    }
+                </div>
+                <div class="ai-mode-toggle">
+                    <button type="button" class="btn btn-sm btn-outline active-mode" id="btnTextMode" onclick="showTextMode()">
+                        <i class="fas fa-keyboard"></i> Texte
+                    </button>
+                    <button type="button" class="btn btn-sm btn-ai" id="btnVoiceMode" onclick="startVoiceChat()">
+                        <i class="fas fa-video"></i> Voix
+                    </button>
+                </div>
+            </div>
+
+            <!-- MODE CHAT TEXTE -->
+            <div class="ai-body" id="textChatPanel">
+                <div class="ai-messages" id="chatMessages">
+                    <div class="ai-message ai-msg-nova">
+                        <div class="msg-avatar nova-av"><i class="fas fa-brain"></i></div>
+                        <div class="msg-content">
+                            <div class="msg-name">Nova</div>
+                            <div class="msg-text">
+                                Salut ! Je suis <strong>Nova</strong>, votre compagnon d'apprentissage IA. Je peux vous aider à comprendre des concepts, vous donner des exemples, vous faire des quiz sur le matériel, ou simplement discuter de ce que vous apprenez. Qu'est-ce qui vous préoccupe ?
+                            </div>
+                        </div>
+                    </div>
+
+                    @foreach (var msg in Model)
+                    {
+                        <div class="ai-message ai-msg-user">
+                            <div class="msg-content msg-content-user">
+                                <div class="msg-text">@msg.UserMessage</div>
+                            </div>
+                        </div>
+                        <div class="ai-message ai-msg-nova">
+                            <div class="msg-avatar nova-av"><i class="fas fa-brain"></i></div>
+                            <div class="msg-content">
+                                <div class="msg-name">Nova</div>
+                                <div class="msg-text">@msg.AiResponse</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="ai-input-bar">
+                    <form asp-controller="AiTutor" asp-action="SendMessage" method="post" class="ai-form">
+                        <input type="hidden" name="moduleId" value="@(module?.Id)" />
+                        <input type="text" name="message" class="ai-input" placeholder="Demandez n'importe quoi à Nova..." autocomplete="off" required />
+                        <button type="submit" class="btn btn-primary btn-ai-send">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- MODE CHAT VOIX/VIDÉO -->
+            <div class="ai-body" id="voiceChatPanel" style="display:none;">
+                <div class="video-wrapper">
+                    <video id="novaVideo" autoplay playsinline muted></video>
+                    <div class="voice-idle" id="voiceIdle">
+                        <div class="voice-idle-icon"><i class="fas fa-brain"></i></div>
+                        <p>Démarrez une conversation en direct avec Nova</p>
+                        <button type="button" class="btn btn-primary btn-lg" id="btnConnect" onclick="connectAnam()">
+                            <i class="fas fa-phone"></i> Connecter
+                        </button>
+                    </div>
+                    <div class="voice-status" id="voiceStatus" style="display:none;">
+                        <i class="fas fa-circle"></i> <span id="voiceStatusText">Connexion en cours...</span>
+                    </div>
+                    <div class="voice-controls" id="voiceControls" style="display:none;">
+                        <button type="button" class="btn btn-glass" id="btnMute" onclick="toggleMute()">
+                            <i class="fas fa-volume-up" id="muteIcon"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger btn-lg" onclick="disconnectAnam()">
+                            <i class="fas fa-phone-slash"></i> Terminer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+    var chat = document.getElementById('chatMessages');
+    chat.scrollTop = chat.scrollHeight;
+
+    function showTextMode() {
+        document.getElementById('textChatPanel').style.display = '';
+        document.getElementById('voiceChatPanel').style.display = 'none';
+        document.getElementById('btnTextMode').classList.add('active-mode');
+        document.getElementById('btnVoiceMode').classList.remove('active-mode');
+    }
+
+    function startVoiceChat() {
+        document.getElementById('textChatPanel').style.display = 'none';
+        document.getElementById('voiceChatPanel').style.display = '';
+        document.getElementById('btnVoiceMode').classList.add('active-mode');
+        document.getElementById('btnTextMode').classList.remove('active-mode');
+    }
+
+    async function connectAnam() {
+        var btnConnect = document.getElementById('btnConnect');
+        var voiceIdle = document.getElementById('voiceIdle');
+        var voiceStatus = document.getElementById('voiceStatus');
+        var voiceStatusText = document.getElementById('voiceStatusText');
+        var voiceControls = document.getElementById('voiceControls');
+
+        voiceIdle.style.display = 'none';
+        voiceStatus.style.display = '';
+        voiceStatusText.textContent = 'Création de la session...';
+        btnConnect.style.display = 'none';
+
+        try {
+            var systemPrompt = "Vous êtes Nova, le compagnon d'apprentissage IA de BrainHuge Academy. Vous êtes chaleureux, encourageant et profondément compétent. Vous adaptez votre style d'enseignement à chaque apprenant. Vous expliquez les concepts en utilisant des analogies claires et des exemples concrets. Gardez les réponses concises mais percutantes. Parlez naturellement, comme un ami brillant qui est aussi un enseignant incroyable.";
+
+            @if (module != null)
+            {
+                <text>
+                systemPrompt += " Vous aidez actuellement l'apprenant avec : @module.Title dans le cours @module.Course.Title. Contexte du module : @module.Content";
+                </text>
+            }
+
+            var tokenResponse = await fetch('/api/anam/session-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ systemPrompt: systemPrompt })
+            });
+
+            if (!tokenResponse.ok) {
+                var errData = await tokenResponse.json();
+                throw new Error(errData.error || 'Échec de l\'obtention du token de session');
+            }
+
+            var tokenData = await tokenResponse.json();
+            voiceStatusText.textContent = 'Connexion à Nova...';
+
+            var modScript = document.createElement('script');
+            modScript.type = 'module';
+            modScript.textContent = `
+                import { createClient } from "https://esm.sh/@@anam-ai/js-sdk@latest";
+
+                var sessionToken = "${tokenData.sessionToken}";
+                var anamClient = createClient(sessionToken);
+
+                window._anamClient = anamClient;
+
+                await anamClient.streamToVideoElement("novaVideo");
+
+                var vid = document.getElementById("novaVideo");
+                vid.muted = false;
+                vid.volume = 1.0;
+                try { await vid.play(); } catch(e) {}
+
+                document.getElementById('voiceStatusText').textContent = 'Connecté ! Parlez à Nova.';
+                document.getElementById('voiceControls').style.display = '';
+                document.getElementById('voiceStatus').querySelector('i').style.color = '#00b894';
+            `;
+            document.head.appendChild(modScript);
+
+        } catch (error) {
+            console.error('Erreur Anam:', error);
+            voiceStatusText.textContent = error.message;
+            voiceStatus.querySelector('i').style.color = '#e74c3c';
+            voiceIdle.style.display = '';
+            btnConnect.style.display = '';
+        }
+    }
+
+    function disconnectAnam() {
+        if (window._anamClient) {
+            try { window._anamClient.disconnect(); } catch(e) {}
+        }
+        document.getElementById('novaVideo').srcObject = null;
+        document.getElementById('voiceIdle').style.display = '';
+        document.getElementById('voiceStatus').style.display = 'none';
+        document.getElementById('voiceControls').style.display = 'none';
+        document.getElementById('btnConnect').style.display = '';
+    }
+
+    function toggleMute() {
+        var video = document.getElementById('novaVideo');
+        var icon = document.getElementById('muteIcon');
+        video.muted = !video.muted;
+        if (video.muted) {
+            icon.className = 'fas fa-volume-mute';
+        } else {
+            icon.className = 'fas fa-volume-up';
+        }
+    }
+</script>
+}
